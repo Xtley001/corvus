@@ -1,0 +1,117 @@
+# Corvus v1.1 — default configuration
+# Sensitive values must be set via CORVUS_ environment variables — NEVER in this file.
+
+ipc_path  = "/tmp/base-geth.ipc"
+chain_id  = 8453
+
+executor_private_key   = ""
+cold_wallet            = ""
+flash_executor_address = ""
+
+# ── Protocol addresses (Base Mainnet) ─────────────────────────────────────────
+balancer_vault           = "0xBA12222222228d8Ba445958a75a0704d566BF2C8"
+morpho_blue              = "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+aave_addresses_provider  = "0xe20fCBdBfFC4Dd138cE8b2E6FBb6CB49777ad64D"
+aerodrome_factory        = "0x420DD381b31aEf6683db6B902084cB0FFECe40Da"
+uniswap_v3_factory       = "0x33128a8fC17869897dcE68Ed026d694621f6FDfD"
+
+# ── Phase control ─────────────────────────────────────────────────────────────
+# active_phase is retained for logging/reference only — S1–S5 run unconditionally.
+# (S6 Backrun and S7 Pendle removed in v1.1)
+active_phase = 3
+
+# ── Strategy thresholds ───────────────────────────────────────────────────────
+# min_profit_usd: raised from $1 → $5 to absorb gas variance (Base can spike to $1.50/tx)
+min_profit_usd              = 5.0
+# min_arb_spread_bps: raised from 5 → 48.
+# Aerodrome fee=30bps + UniV3 fee=5bps (500-pool) = 35bps floor cost on a round trip.
+# At 5bps we were running full REVM simulation on ~95% phantom opportunities — trades
+# that cannot possibly be profitable after fees.  48bps = 35bps fees + 13bps margin.
+min_arb_spread_bps          = 48.0
+min_liquidation_profit_usd  = 50.0
+min_jit_profit_usd          = 50.0
+min_rate_spread_bps         = 100.0
+max_gas_price_gwei          = 200.0
+pool_min_liquidity_usd      = 100_000.0
+# 100 blocks (~3.3 minutes) for responsive pool discovery
+pool_refresh_blocks         = 100
+
+# ── Bootstrap ────────────────────────────────────────────────────────────────
+bootstrap_from_block = 2_100_000
+
+# ── ETH Price ─────────────────────────────────────────────────────────────────
+# Fallback used before the first Chainlink oracle update arrives.
+# Override with CORVUS_ETH_PRICE_FALLBACK_USD if desired.
+# This is a conservative seed — live price is fetched from Chainlink within seconds.
+eth_price_fallback_usd = 2500.0
+
+# ── JIT ───────────────────────────────────────────────────────────────────────
+jit_min_swap_usd = 50_000.0
+# AUDIT 2.9: S4 Flash JIT is OFF until rebuilt + fork-tested (heuristic profit math,
+# Aerodrome/UniV3 pool-type mismatch, sparse Base mempool signal). Do not enable blind.
+jit_enabled = false
+
+# ── REVM simulation ───────────────────────────────────────────────────────────
+revm_sim_gas_limit = 5_000_000
+
+# ── Gas ───────────────────────────────────────────────────────────────────────
+priority_fee_multiplier  = 0.10
+max_fee_base_multiplier  = 2.0
+rpc_timeout_secs         = 3
+# 15% safety margin on all static gas estimates (accounts for simulation variance)
+gas_estimate_safety_margin = 1.15
+
+# ── Slippage & profit gates ───────────────────────────────────────────────────
+min_profit_slippage_bps     = 8000
+liquidation_swap_haircut    = 0.018
+liquidation_safety_factor   = 0.9
+# 3% margin before insolvency trigger
+liquidation_hf_threshold    = 1.03
+
+# ── Rate Arb ─────────────────────────────────────────────────────────────────
+rate_arb_close_spread_bps       = 50.0
+rate_arb_close_hf               = 1.15
+rate_arb_emergency_hf           = 1.10
+rate_arb_max_hold_days          = 14.0
+rate_arb_base_leverage          = 2.5
+rate_arb_max_notional_usdc      = 500_000_000_000
+rate_arb_max_notional_weth      = 200_000_000_000_000_000_000
+rate_arb_max_breakeven_days     = 3.0
+# Min $50K notional for cbBTC rate arb to justify gas cost
+rate_arb_cbbtc_min_notional_usd = 50_000.0
+# ~5 minutes at 2s blocks — prevents open+close in same epoch (2× gas, zero spread)
+rate_arb_min_hold_blocks = 150
+# AUDIT 2.5: opening new S5 positions is OFF until a native Morpho carry path is built.
+# Unwinding existing positions is always allowed. Do not enable without a Morpho-aware
+# calldata builder + fork test.
+rate_arb_open_enabled = false
+
+# ── Position persistence ──────────────────────────────────────────────────────
+# Rate arb positions written here on every change; reloaded on restart.
+# Directory must exist: sudo mkdir -p /var/lib/corvus && sudo chown $USER /var/lib/corvus
+position_store_path = "/var/lib/corvus/rate_arb_positions.json"
+
+# ── Monitoring ────────────────────────────────────────────────────────────────
+monitoring_gas_check_interval_blocks = 100
+
+# ── RPC / builder endpoints ───────────────────────────────────────────────────
+base_sequencer_rpc = "https://mainnet-sequencer.base.org"
+
+# AUDIT 3.1 FIX: builder_endpoints is now EMPTY. Base is a single-sequencer OP-Stack
+# chain — there are no external block builders, and `rpc.flashbots.net/fast` includes
+# transactions on ETHEREUM L1, not Base (a Base tx sent there simply never lands).
+# All strategies broadcast directly to the Base sequencer RPC (base_sequencer_rpc above);
+# the realistic edge on Base is low submission latency + priority-fee tuning, not bundles.
+# Only add an endpoint here if/when a REAL Base MEV/bundle relay exists and is verified.
+builder_endpoints  = []
+
+metrics_port = 9090
+
+# ── Telegram Alerting (F-09 FIX) ─────────────────────────────────────────────
+# Required for all 6 mandatory alert conditions. Without this, the operator is
+# blind to production failures at 3AM.
+# Set via environment variables — NEVER hardcode in this file.
+#   export CORVUS_TELEGRAM_BOT_TOKEN="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+#   export CORVUS_TELEGRAM_CHAT_ID="-100123456789"
+telegram_bot_token = ""
+telegram_chat_id   = 0

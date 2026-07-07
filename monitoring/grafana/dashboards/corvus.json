@@ -1,0 +1,278 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "annotations": { "list": [] },
+  "description": "Corvus MEV System — Base Mainnet",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "24h Profit",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "textMode": "value_and_name",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "#22C55E", "mode": "fixed" },
+          "unit": "currencyUSD",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#EF4444", "value": null },
+              { "color": "#F59E0B", "value": 0 },
+              { "color": "#22C55E", "value": 100 }
+            ]
+          }
+        }
+      },
+      "targets": [{ "expr": "increase(corvus_profit_usd_total[24h])", "legendFormat": "24h Profit" }]
+    },
+    {
+      "id": 2,
+      "title": "Total Trades",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 3, "x": 4, "y": 0 },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "#3B82F6", "mode": "fixed" },
+          "unit": "short",
+          "decimals": 0
+        }
+      },
+      "targets": [{ "expr": "corvus_trades_total", "legendFormat": "Trades" }]
+    },
+    {
+      "id": 3,
+      "title": "Inclusion Rate",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 3, "x": 7, "y": 0 },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0, "max": 1,
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#EF4444", "value": null },
+              { "color": "#F59E0B", "value": 0.2 },
+              { "color": "#22C55E", "value": 0.5 }
+            ]
+          }
+        }
+      },
+      "targets": [{ "expr": "corvus_inclusion_rate", "legendFormat": "Inclusion" }]
+    },
+    {
+      "id": 4,
+      "title": "Gas Reserve",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 3, "x": 10, "y": 0 },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 3,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#EF4444", "value": null },
+              { "color": "#F59E0B", "value": 1 },
+              { "color": "#22C55E", "value": 2 }
+            ]
+          }
+        }
+      },
+      "targets": [{ "expr": "corvus_gas_reserve_eth", "legendFormat": "ETH" }]
+    },
+    {
+      "id": 5,
+      "title": "Active S5 Positions",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 3, "x": 13, "y": 0 },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "#3B82F6", "mode": "fixed" },
+          "unit": "short",
+          "decimals": 0
+        }
+      },
+      "targets": [{ "expr": "corvus_active_positions", "legendFormat": "Positions" }]
+    },
+    {
+      "id": 6,
+      "title": "Rate Arb Min HF",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 1.0, "max": 2.0,
+          "decimals": 3,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#EF4444", "value": null },
+              { "color": "#EF4444", "value": 1.10 },
+              { "color": "#F59E0B", "value": 1.15 },
+              { "color": "#22C55E", "value": 1.30 }
+            ]
+          }
+        }
+      },
+      "targets": [{ "expr": "corvus_rate_arb_min_hf", "legendFormat": "Min HF" }]
+    },
+    {
+      "id": 7,
+      "title": "Profit / Hour (last 24h)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 14, "x": 0, "y": 4 },
+      "options": {
+        "legend": { "calcs": ["mean", "max", "sum"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "#22C55E", "mode": "fixed" },
+          "unit": "currencyUSD",
+          "custom": { "lineWidth": 2, "fillOpacity": 10 }
+        }
+      },
+      "targets": [
+        { "expr": "rate(corvus_profit_usd_total[1h]) * 3600", "legendFormat": "$/hr" }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Strategy Breakdown",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 10, "x": 14, "y": 4 },
+      "options": {
+        "legendDisplayMode": "table",
+        "placement": "right",
+        "pieType": "donut"
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "currencyUSD" }
+      },
+      "targets": [
+        { "expr": "corvus_strategy_profit_usd", "legendFormat": "{{strategy}}" }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Strategy Activity",
+      "type": "bargauge",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 12 },
+      "options": {
+        "displayMode": "lcd",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#3B82F6", "value": null },
+              { "color": "#22C55E", "value": 1000 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        { "expr": "corvus_strategy_profit_usd", "legendFormat": "{{strategy}}" }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "IPC Node Latency (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 5, "w": 12, "x": 0, "y": 18 },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "#3B82F6", "mode": "fixed" },
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "#22C55E", "value": null },
+              { "color": "#F59E0B", "value": 5 },
+              { "color": "#EF4444", "value": 10 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        { "expr": "corvus_node_ipc_latency_ms", "legendFormat": "IPC latency" }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Submissions / 5min",
+      "type": "timeseries",
+      "gridPos": { "h": 5, "w": 12, "x": 12, "y": 18 },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "#F59E0B", "mode": "fixed" },
+          "unit": "short",
+          "custom": { "lineWidth": 1, "fillOpacity": 5 }
+        }
+      },
+      "targets": [
+        { "expr": "rate(corvus_submissions_total[5m]) * 300", "legendFormat": "Submissions" }
+      ]
+    }
+  ],
+  "refresh": "2s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["corvus", "mev", "base"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Corvus",
+  "uid": "corvus-main",
+  "version": 1
+}

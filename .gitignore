@@ -1,0 +1,40 @@
+# F-06 FIX: .gitignore created — previously absent, risking .env commit with private keys.
+# CRITICAL: Never commit .env — it contains CORVUS_EXECUTOR_PRIVATE_KEY and DEPLOYER_PRIVATE_KEY.
+
+# ── Secrets ───────────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Rust build artifacts ──────────────────────────────────────────────────────
+target/
+bot/target/
+**/*.rs.bk
+
+# ── Node / Foundry ────────────────────────────────────────────────────────────
+node_modules/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+
+# ── IPC / sockets ─────────────────────────────────────────────────────────────
+*.ipc
+
+# ── Position store ────────────────────────────────────────────────────────────
+/var/lib/corvus/
+*.json.bak
+
+# ── Grafana / monitoring state ────────────────────────────────────────────────
+monitoring/grafana/data/
+monitoring/grafana/plugins/
+monitoring/prometheus/data/
+
+# ── Logs & crashes ────────────────────────────────────────────────────────────
+*.log
+crash.log
+corvus.log*
+
+# ── OS junk ───────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

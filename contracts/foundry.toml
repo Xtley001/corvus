@@ -1,0 +1,15 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.24"
+optimizer = true
+optimizer_runs = 1000000
+via_ir = true
+evm_version = "cancun"
+
+[rpc_endpoints]
+base = "http://127.0.0.1:8545"
+
+[etherscan]
+base = { key = "${BASESCAN_API_KEY}", chain = 8453, url = "https://api.basescan.org/api" }

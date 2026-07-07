@@ -1,0 +1,49 @@
+# Corvus MEV bot — systemd unit for bare-metal deployment (AUDIT 6.2).
+# Install:
+#   sudo cp deploy/corvus.service /etc/systemd/system/corvus.service
+#   sudo mkdir -p /etc/corvus && sudo cp bot/.env /etc/corvus/corvus.env   # your secrets
+#   sudo systemctl daemon-reload && sudo systemctl enable --now corvus
+#
+# Notes:
+#   • Runs the NATIVE binary (lowest latency) — not a container.
+#   • PrivateTmp=false so the op-geth IPC socket under /tmp stays visible. If you move the
+#     socket off /tmp (recommended for bare metal), point ipc_path at e.g. /var/run/base/geth.ipc
+#     and you can set PrivateTmp=true.
+#   • StateDirectory gives /var/lib/corvus with corvus-owned perms for position persistence.
+
+[Unit]
+Description=Corvus Flash-Loan MEV bot (Base Mainnet)
+After=op-geth.service network-online.target
+Wants=network-online.target
+Requires=op-geth.service
+
+[Service]
+Type=simple
+User=corvus
+Group=corvus
+ExecStart=/usr/local/bin/corvus
+WorkingDirectory=/opt/corvus/bot
+EnvironmentFile=/etc/corvus/corvus.env
+Environment=RUST_LOG=corvus=info
+
+Restart=on-failure
+RestartSec=5
+# Give the panic hook / graceful shutdown time to flush open positions before SIGKILL.
+TimeoutStopSec=15
+KillSignal=SIGTERM
+
+# Filesystem / privileges
+PrivateTmp=false
+StateDirectory=corvus
+StateDirectoryMode=0750
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/corvus
+
+# Resources
+LimitNOFILE=65536
+Nice=-10
+
+[Install]
+WantedBy=multi-user.target

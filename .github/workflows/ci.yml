@@ -1,0 +1,40 @@
+# CI gate. The audit's #1 finding was that the Rust engine had never been compiled
+# (three missing-constant errors slipped in). This workflow makes a broken build
+# impossible to merge: it builds against the committed Cargo.lock and runs the unit
+# tests. Contract build + fork tests run locally (they need external libs / a Base
+# node) — see CONTRIBUTING.md.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  bot:
+    name: bot (build / test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: bot
+      # Hard gate: build against the committed Cargo.lock — no surprise versions.
+      - name: Build
+        run: cargo build --release --locked
+      # Unit tests only (--bins). The tests/ integration suite needs a live Base node.
+      - name: Unit tests
+        run: cargo test --release --locked --bins
+      # Advisory: lint findings are surfaced in the log but do not block the build yet.
+      - name: Clippy
+        continue-on-error: true
+        run: cargo clippy --release --locked -- -W clippy::all
